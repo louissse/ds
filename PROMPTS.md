@@ -1,0 +1,56 @@
+# AI usage during development
+
+This document records selected relevant prompts and how the suggestions were used. It is updated at significant milestones. The prompt excerpts below are translated from Danish.
+
+## Working approach
+
+I used Codex as a discussion partner and for small code suggestions. I asked for a limited scope and explanations throughout so I could work in the code myself and explain the decisions. I chose a script with SQLite, Hono, React and search through the OpenAlex API. Implementation proceeded in small steps.
+
+## Selected prompts
+
+### Scope and understanding
+
+> It is important that you do not just write a lot of code that I cannot follow while we develop. I need to be able to explain all the choices.
+
+AI helped read the exercise and propose a step-by-step plan. I kept the scope small and prioritised familiar technologies. Three Matt Pocock skills were installed for clarification and documentation; his full workflow was not adopted.
+
+### A data model based on the UI
+
+> Even though we are not using our own database for the final search, I still think we should consider which fields we store in relation to the final display.
+
+I shared a concrete API response. AI proposed a smaller publication object and a mapping. We selected fields for the list and detail views, preserving authors' institutions and countries as nested data.
+
+### Refinements and corrections
+
+I challenged suggestions during development:
+
+- I asked to preserve `author_position` alongside the author list order.
+- I questioned the meaning of affiliations and compared a publication on Forskningsportalen and OpenAlex myself. We established that the combined institution list can be derived from author affiliations, deduplicated by institution ID. AI had initially suggested that the publication's empty `institutions` field might be relevant; this was corrected after consulting the documentation.
+- I pointed out that publications can change between imports. AI's initial suggestion to skip existing IDs was therefore changed to an upsert that updates the data.
+
+### Implementation and troubleshooting
+
+AI suggested small code snippets for API requests, mapping, abstract reconstruction and SQLite storage. I inserted and adapted the code and ran it incrementally. AI configured Prettier directly in the project.
+
+When the API key was `undefined`, AI checked the variable name and configuration without printing the key. The solution was to load `.env` explicitly in the import command.
+
+### Pagination and API load
+
+> How do we fetch 1,000 publications without overloading the API?
+
+AI consulted the OpenAlex documentation and proposed sequential requests with 100 publications per page, a one-second pause between pages and limited retries for temporary HTTP errors. I suggested moving API handling into a separate file. We first extracted the working API call, then added pagination, then retries. I applied the changes incrementally and ran the full import successfully.
+
+### Exploring the interface before implementation
+
+> I would like to take a short break from code and decide on UX and UI with a quick browser prototype using no real data.
+
+AI built a separate interactive prototype with fictional publications. I directed revisions to contrast, typography and colours using Research Portal Denmark and Statistics Denmark as references. I specified the introduction background and blue border, refined result spacing into three groups, chose plain comma-separated topics instead of badges, and requested a search-type dropdown and a discreet clear-filters action. We also agreed on skeleton loading, retryable request errors and a separate empty-results state for the implementation. These are design decisions; they do not mean the actual frontend has been implemented.
+
+## Verification
+
+- I first ran the API request for one publication and reviewed the transformed object in the terminal.
+- I inspected the stored row in SQLite Viewer. An apparently empty database turned out to be a view that needed reopening; AI also checked the database file directly.
+- I tested upsert by saving a test title and then reimporting the correct title. The publication was updated without adding another row.
+- The import was extended to multiple publications, then two pages and finally 10 pages. I confirmed that 1,000 publications were stored and that I understood the flow. AI subsequently verified the row count directly in SQLite.
+
+There are no automated tests yet, and the retry branches have not been explicitly tested. The import of 1,000 publications is complete; the backend and frontend are not implemented yet.
