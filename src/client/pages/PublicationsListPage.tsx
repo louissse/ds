@@ -1,3 +1,4 @@
+import { PublicationSearchControls } from "../components/PublicationSearchControls";
 import { PublicationListItem } from "../components/PublicationListItem";
 import { usePublications } from "../hooks/usePublications";
 import { useSearchParams } from "react-router";
@@ -30,8 +31,39 @@ export default function PublicationsListPage() {
     : 0;
 
   return (
-    <main className="p-8 text-[#002e2e]">
-      <h1 className="text-3xl font-bold">Climate research in Denmark</h1>
+    <main className="mx-auto max-w-5xl border-t-4 border-[#0074c6] px-5 py-8 text-[#002e2e] sm:px-8">
+      <header className="border-l-4 border-[#0074c6] bg-[#F4F7FC] p-5 sm:p-7">
+        <p className="text-xs font-semibold tracking-wide uppercase">
+          Publications, Danish institutions
+        </p>
+        <h1 className="mt-2 text-3xl leading-tight font-bold sm:text-4xl">
+          Climate research in Denmark
+        </h1>
+        <p className="mt-4">
+          Discover publications connected to Danish research institutions.
+        </p>
+        <ul
+          aria-label="Collection scope"
+          className="mt-5 flex flex-wrap gap-2 text-sm"
+        >
+          {["Climate change", "Danish affiliations", "Published in 2025"].map(
+            (scope) => (
+              <li
+                key={scope}
+                className="border border-[#b5cccf] bg-white px-2.5 py-1"
+              >
+                {scope}
+              </li>
+            ),
+          )}
+        </ul>
+      </header>
+      <PublicationSearchControls />
+      {data && !isError && (
+        <p className="mt-7 border-b-2 border-[#002e2e] pb-3" aria-live="polite">
+          {data.total.toLocaleString("en-GB")} publications
+        </p>
+      )}
 
       {isPending ? (
         <PublicationListSkeleton />

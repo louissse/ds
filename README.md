@@ -4,7 +4,7 @@ A full-stack coding exercise exploring climate-related publications from Danish 
 
 ## Scope and status
 
-The import script has successfully stored 1,000 publications in SQLite. The first Hono/React vertical slice is complete: a paginated publication list with loading skeletons, empty and error states, and manual retry. Search, filters and details remain to be implemented.
+The import script has successfully stored 1,000 publications in SQLite. The first Hono/React vertical slice is complete: a paginated publication list with loading skeletons, empty and error states, and manual retry. Publication details are also implemented; search and filters remain to be implemented. See [the detail story](docs/stories/02-publication-details.md) for verification and remaining manual checks.
 
 Search will use the OpenAlex API directly within the exercise's fixed scope. SQLite separately demonstrates data extraction and storage. Additional analysis and public deployment are currently out of scope.
 
@@ -104,7 +104,7 @@ HTTP 429 and server errors (5xx) trigger up to three retries, normally after 2, 
 
 A publication was fetched, transformed and inspected in SQLite Viewer. Upsert was tested by importing the title as `TEST`, then importing the original title again. There was still only one row with that ID. The import was expanded incrementally, first to multiple publications, then two pages, and finally 10 pages. The completed import was verified to contain 1,000 rows in SQLite.
 
-Run `npm test` for the first Vitest test: it verifies abstract reconstruction with out-of-order and repeated words through the shared publication mapping. Run `npm run typecheck` for static type checking. Both checks pass. Retry branches have not been explicitly tested. The list frontend and Hono endpoints work locally. See the first story for the manual verification record and remaining limitations.
+Run `npm test` for six Vitest tests covering abstract reconstruction, detail routes, safe errors/retry and scope-preserving OpenAlex detail queries. Tests simulate upstream responses without live API calls. Run `npm run typecheck` for static type checking. Both checks pass. Retry branches have not been explicitly tested. The list frontend and Hono endpoints work locally. See the first story for the manual verification record and remaining limitations.
 
 ## UX and visual direction
 

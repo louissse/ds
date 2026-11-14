@@ -68,3 +68,7 @@ AI installed Vitest and wrote one focused test of abstract reconstruction throug
 The developer wrote most of the Hono, React, Vite, Tailwind and TanStack Query setup with incremental AI guidance. At explicit requests, AI corrected type connections, implemented the publication list item and pagination controls, and limited the display to the first three authors and their institutions. The developer questioned the need for React Router and requested an explanation of fetch cancellation and timeouts before implementing a 30-second timeout.
 
 The developer manually checked pagination, skeletons, error handling, empty results, narrow layout, keyboard operation and boundary controls. AI verified that the temporary empty response was removed and reran type checking and the existing abstract test successfully. Search, filters and details remain outside this completed slice.
+
+## Detail presentation and verification
+
+At my request, AI implemented the detail layout following the agreed design, then revised author and institution sections into compact, expandable paragraphs based on my feedback. I asked AI to add a detail skeleton and test the flow. AI separated the Hono app from server startup for testing and added simulated-response tests for detail success, invalid IDs, 404, upstream failure/recovery and fixed-scope query construction. All six tests, type checking and frontend build pass. Browser rendering and expansion behaviour still need final manual verification; backend tests do not claim to cover those interactions.

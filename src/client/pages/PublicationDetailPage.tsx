@@ -1,3 +1,4 @@
+import { PublicationDetailSkeleton } from "../components/PublicationDetailSkeleton";
 import { PublicationDetails } from "../components/PublicationDetails";
 import { Link, useLocation, useParams } from "react-router";
 import { usePublication } from "../hooks/usePublication";
@@ -26,9 +27,7 @@ export default function PublicationDetailPage() {
           Invalid publication ID.
         </p>
       ) : isPending ? (
-        <p role="status" className="mt-6">
-          Loading publication…
-        </p>
+        <PublicationDetailSkeleton />
       ) : isError ? (
         <div role="alert" className="mt-6">
           <p>{error.message}</p>
