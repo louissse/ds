@@ -1,6 +1,13 @@
+import type {
+  OpenAlexWork,
+  OpenAlexWorksResponse,
+} from "./shared/openalex-types";
 import { setTimeout as sleep } from "node:timers/promises";
 
-export async function fetchPublicationsPage(page: number, pageSize: number) {
+export async function fetchPublicationsPage(
+  page: number,
+  pageSize: number,
+): Promise<OpenAlexWork[]> {
   const url = new URL("https://api.openalex.org/works");
 
   url.searchParams.set("search", "climate change");
@@ -25,7 +32,7 @@ export async function fetchPublicationsPage(page: number, pageSize: number) {
     const response = await fetch(url);
 
     if (response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as OpenAlexWorksResponse;
       return data.results;
     }
 
@@ -58,4 +65,5 @@ export async function fetchPublicationsPage(page: number, pageSize: number) {
 
     await sleep(delayMs);
   }
+  throw new Error("OpenAlex request did not complete");
 }

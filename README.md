@@ -95,7 +95,7 @@ HTTP 429 and server errors (5xx) trigger up to three retries, normally after 2, 
 
 A publication was fetched, transformed and inspected in SQLite Viewer. Upsert was tested by importing the title as `TEST`, then importing the original title again. There was still only one row with that ID. The import was expanded incrementally, first to multiple publications, then two pages, and finally 10 pages. The completed import was verified to contain 1,000 rows in SQLite.
 
-There are no automated tests yet. The retry branches have not been explicitly tested. The backend and frontend remain to be implemented and verified.
+Run `npm test` for the first Vitest test: it verifies abstract reconstruction with out-of-order and repeated words through the shared publication mapping. Run `npm run typecheck` for static type checking. Both checks pass. Retry branches have not been explicitly tested. The initial Hono endpoints are working locally; the frontend is not implemented yet.
 
 ## UX and visual direction
 

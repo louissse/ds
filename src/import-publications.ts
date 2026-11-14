@@ -1,26 +1,9 @@
 import Database from "better-sqlite3";
 import { fetchPublicationsPage } from "./openalex";
 import { setTimeout as sleep } from "node:timers/promises";
+import { mapPublication } from "./shared/publications";
 
 console.log("Import af publikationer");
-
-function buildAbstract(
-  invertedIndex: Record<string, number[]> | null,
-): string | null {
-  if (!invertedIndex) {
-    return null;
-  }
-
-  const words: string[] = [];
-
-  for (const [word, positions] of Object.entries(invertedIndex)) {
-    for (const position of positions) {
-      words[position] = word;
-    }
-  }
-
-  return words.join(" ");
-}
 
 async function main() {
   //Opret database og tabel for publikationer hvis de ikke allerede eksisterer
@@ -82,34 +65,7 @@ async function main() {
     }
 
     for (const work of works) {
-      const publication = {
-        id: work.id,
-        title: work.title,
-        publicationDate: work.publication_date,
-        citationCount: work.cited_by_count,
-        doi: work.doi,
-        authorships: work.authorships.map((authorship) => ({
-          authorId: authorship.author.id,
-          authorName: authorship.author.display_name,
-          authorPosition: authorship.author_position,
-          institutions: authorship.institutions.map((institution) => ({
-            id: institution.id,
-            name: institution.display_name,
-            countryCode: institution.country_code,
-          })),
-        })),
-        topics: work.topics.map((topic) => ({
-          id: topic.id,
-          name: topic.display_name,
-        })),
-        landingPageUrl: work.primary_location?.landing_page_url ?? null,
-        openAccess: {
-          isOpenAccess: work.open_access.is_oa,
-          status: work.open_access.oa_status,
-          url: work.open_access.oa_url,
-        },
-        abstract: buildAbstract(work.abstract_inverted_index),
-      };
+      const publication = mapPublication(work);
 
       console.dir(publication, { depth: null });
 

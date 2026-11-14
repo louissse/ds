@@ -58,3 +58,7 @@ There are no automated tests yet, and the retry branches have not been explicitl
 ## Architecture clarification before the first slice
 
 I explicitly requested the grill-with-docs skill to establish a shared understanding before implementation. AI asked questions in rounds and recorded agreed decisions in [the architecture document](docs/architecture.md). I chose Tailwind and TanStack Query over the initial suggestions of plain CSS and built-in React data fetching because I already know these tools. We agreed on a shared publication mapping, server-side OpenAlex access, URL-based search state, React Router, backend retries, optional deployment and a small Vitest test suite alongside manual browser checks. The user confirmed the consolidated architecture on 14 November 2026; this entry records planning, not completed implementation or tests.
+
+## First automated test
+
+AI installed Vitest and wrote one focused test of abstract reconstruction through the shared publication mapper, using fictional input with out-of-order and repeated words. AI ran `npm test` and `npm run typecheck`; both passed. This verifies only that behaviour, not the full mapping or HTTP flow.
