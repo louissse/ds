@@ -6,7 +6,9 @@ import { PublicationListSkeleton } from "../components/PublicationListSkeleton";
 
 export default function PublicationsListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const institution = searchParams.get("institution") ?? "";
   const requestedPage = Number(searchParams.get("page") ?? "1");
+  const query = searchParams.get("q")?.trim() ?? "";
 
   const page =
     Number.isInteger(requestedPage) &&
@@ -15,13 +17,39 @@ export default function PublicationsListPage() {
       ? requestedPage
       : 1;
 
-  const { data, isPending, isError, refetch, isFetching } =
-    usePublications(page);
+  const { data, isPending, isError, refetch, isFetching } = usePublications(
+    page,
+    query,
+    institution,
+  );
 
   function goToPage(nextPage: number) {
     setSearchParams((current) => {
       const updated = new URLSearchParams(current);
       updated.set("page", String(nextPage));
+      return updated;
+    });
+  }
+
+  function searchPublications(query: string) {
+    setSearchParams((current) => {
+      const updated = new URLSearchParams(current);
+      if (query) {
+        updated.set("q", query);
+      } else {
+        updated.delete("q");
+      }
+      updated.set("page", "1");
+      return updated;
+    });
+  }
+
+  function changeInstitution(id: string) {
+    setSearchParams((current) => {
+      const updated = new URLSearchParams(current);
+      if (id) updated.set("institution", id);
+      else updated.delete("institution");
+      updated.set("page", "1");
       return updated;
     });
   }
@@ -58,7 +86,13 @@ export default function PublicationsListPage() {
           )}
         </ul>
       </header>
-      <PublicationSearchControls />
+      <PublicationSearchControls
+        key={query}
+        query={query}
+        onSearch={searchPublications}
+        institution={institution}
+        onInstitutionChange={changeInstitution}
+      />
       {data && !isError && (
         <p className="mt-7 border-b-2 border-[#002e2e] pb-3" aria-live="polite">
           {data.total.toLocaleString("en-GB")} publications

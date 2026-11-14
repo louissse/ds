@@ -8,8 +8,24 @@ export type PublicationsResponse = {
   pageSize: number;
 };
 
-async function fetchPublications(page: number): Promise<PublicationsResponse> {
-  const response = await fetch(`/api/publications?page=${page}`, {
+async function fetchPublications(
+  page: number,
+  query: string,
+  institution: string,
+): Promise<PublicationsResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+  });
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  if (institution) {
+    params.set("institution", institution);
+  }
+
+  const response = await fetch(`/api/publications?${params}`, {
     signal: AbortSignal.timeout(10_000),
   });
 
@@ -20,9 +36,13 @@ async function fetchPublications(page: number): Promise<PublicationsResponse> {
   return response.json();
 }
 
-export function usePublications(page: number) {
+export function usePublications(
+  page: number,
+  query: string,
+  institution: string,
+) {
   return useQuery({
-    queryKey: ["publications", page],
-    queryFn: () => fetchPublications(page),
+    queryKey: ["publications", page, query, institution],
+    queryFn: () => fetchPublications(page, query, institution),
   });
 }

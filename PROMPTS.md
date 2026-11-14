@@ -72,3 +72,7 @@ The developer manually checked pagination, skeletons, error handling, empty resu
 ## Detail presentation and verification
 
 At my request, AI implemented the detail layout following the agreed design, then revised author and institution sections into compact, expandable paragraphs based on my feedback. I asked AI to add a detail skeleton and test the flow. AI separated the Hono app from server startup for testing and added simulated-response tests for detail success, invalid IDs, 404, upstream failure/recovery and fixed-scope query construction. All six tests, type checking and frontend build pass. Browser rendering and expansion behaviour still need final manual verification; backend tests do not claim to cover those interactions.
+
+## Search and institution filter
+
+The developer implemented title search and institution-group endpoints with AI guidance and proposed obtaining institution choices from the current search rather than a hard-coded list. We limited options to the top 100 groups. At the developer's request, AI connected a controlled search input and later the institution filter through URL state, query keys and backend validation. AI added three targeted tests; all nine tests pass. Topic filtering and author/country search are not implemented. The developer requested a pause after connecting institutions to reassess the time spent.

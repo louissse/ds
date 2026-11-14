@@ -135,3 +135,9 @@ Local execution of the import script is described above. Backend and frontend de
 ## AI usage
 
 See [PROMPTS.md](PROMPTS.md) for selected prompts, division of work and verification of AI suggestions.
+
+## Search and institution filtering status
+
+Title search and institution filtering are connected from React through Hono to OpenAlex. Committed search text and institution ID are stored in URL parameters and query keys. Changing the institution resets pagination to page 1; Clear filters removes the institution while preserving the search. Institution options follow title search, not the selected institution or publication page. They contain at most the top 100 matching institutions by publication count, displayed alphabetically, including international collaborators. Topic filtering and author/country search remain unimplemented.
+
+Nine automated tests pass, including institution validation and outgoing scope preservation. The latest institution-selection UI still needs a manual browser check. Work is paused here for a scope/time review.

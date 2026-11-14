@@ -5,10 +5,15 @@ export async function fetchPublicationsPage(
   page: number,
   pageSize: number,
   workId?: string,
+  titleQuery?: string,
+  institutionId?: string,
 ): Promise<OpenAlexWorksResponse> {
   const url = new URL("https://api.openalex.org/works");
 
   url.searchParams.set("search", "climate change");
+  if (titleQuery) {
+    url.searchParams.set("search.title", titleQuery);
+  }
   url.searchParams.set(
     "filter",
     "institutions.country_code:DK,from_publication_date:2025-01-01,to_publication_date:2025-12-31",
@@ -17,6 +22,13 @@ export async function fetchPublicationsPage(
     const scopeFilter = url.searchParams.get("filter");
 
     url.searchParams.set("filter", `${scopeFilter},openalex:${workId}`);
+  }
+  if (institutionId) {
+    const scopeFilter = url.searchParams.get("filter");
+    url.searchParams.set(
+      "filter",
+      `${scopeFilter},authorships.institutions.id:${institutionId}`,
+    );
   }
   url.searchParams.set("page", String(page));
   url.searchParams.set("per_page", String(pageSize));
@@ -69,4 +81,55 @@ export async function fetchPublicationsPage(
     await sleep(delayMs);
   }
   throw new Error("OpenAlex request did not complete");
+}
+
+type InstitutionGroupsResponse = {
+  group_by: {
+    key: string;
+    key_display_name: string;
+    count: number;
+  }[];
+};
+
+export async function fetchInstitutions(titleQuery?: string) {
+  const url = new URL("https://api.openalex.org/works");
+
+  url.searchParams.set("search", "climate change");
+  url.searchParams.set(
+    "filter",
+    "institutions.country_code:DK,from_publication_date:2025-01-01,to_publication_date:2025-12-31",
+  );
+
+  if (titleQuery) {
+    url.searchParams.set("search.title", titleQuery);
+  }
+
+  url.searchParams.set("group_by", "authorships.institutions.id");
+  url.searchParams.set("per_page", "100");
+  url.searchParams.set("sort", "count:desc");
+
+  const apiKey = process.env.OPENALEX_API_KEY;
+
+  if (apiKey) {
+    url.searchParams.set("api_key", apiKey);
+  }
+
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAlex returned status ${response.status}`);
+  }
+
+  const data = (await response.json()) as InstitutionGroupsResponse;
+
+  return data.group_by
+    .filter((group) => group.key.startsWith("https://openalex.org/I"))
+    .map((group) => ({
+      id: group.key,
+      name: group.key_display_name,
+      count: group.count,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "en"));
 }

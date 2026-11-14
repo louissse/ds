@@ -60,3 +60,18 @@ test("an upstream failure returns a safe error and a later retry can succeed", a
   expect(retried.status).toBe(200);
   vi.restoreAllMocks();
 });
+
+test("list queries pass title and institution to OpenAlex", async () => {
+  fetchPage.mockResolvedValue({ meta: { count: 0 }, results: [] });
+  const response = await app.request(
+    "/api/publications?q=bats&institution=I123",
+  );
+  expect(response.status).toBe(200);
+  expect(fetchPage).toHaveBeenCalledWith(1, 10, undefined, "bats", "I123");
+});
+
+test("invalid institution filters are rejected before contacting OpenAlex", async () => {
+  const response = await app.request("/api/publications?institution=invalid");
+  expect(response.status).toBe(400);
+  expect(fetchPage).not.toHaveBeenCalled();
+});
