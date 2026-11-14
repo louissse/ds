@@ -8,6 +8,14 @@ The import script has successfully stored 1,000 publications in SQLite. A Hono b
 
 Search will use the OpenAlex API directly within the exercise's fixed scope. SQLite separately demonstrates data extraction and storage. Additional analysis and public deployment are currently out of scope.
 
+## Architecture
+
+See [application architecture](docs/architecture.md) for the agreed technology choices and decisions still being clarified.
+
+## First vertical slice
+
+The next implementation goal is [View climate research publications](docs/stories/01-publication-list.md), with scope, acceptance criteria and verification steps.
+
 ## Running the import
 
 Development uses Node.js 22.14.0 and npm.

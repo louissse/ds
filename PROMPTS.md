@@ -54,3 +54,7 @@ AI built a separate interactive prototype with fictional publications. I directe
 - The import was extended to multiple publications, then two pages and finally 10 pages. I confirmed that 1,000 publications were stored and that I understood the flow. AI subsequently verified the row count directly in SQLite.
 
 There are no automated tests yet, and the retry branches have not been explicitly tested. The import of 1,000 publications is complete; the backend and frontend are not implemented yet.
+
+## Architecture clarification before the first slice
+
+I explicitly requested the grill-with-docs skill to establish a shared understanding before implementation. AI asked questions in rounds and recorded agreed decisions in [the architecture document](docs/architecture.md). I chose Tailwind and TanStack Query over the initial suggestions of plain CSS and built-in React data fetching because I already know these tools. We agreed on a shared publication mapping, server-side OpenAlex access, URL-based search state, React Router, backend retries, optional deployment and a small Vitest test suite alongside manual browser checks. The user confirmed the consolidated architecture on 14 November 2026; this entry records planning, not completed implementation or tests.
