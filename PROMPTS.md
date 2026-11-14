@@ -76,3 +76,5 @@ At my request, AI implemented the detail layout following the agreed design, the
 ## Search and institution filter
 
 The developer implemented title search and institution-group endpoints with AI guidance and proposed obtaining institution choices from the current search rather than a hard-coded list. We limited options to the top 100 groups. At the developer's request, AI connected a controlled search input and later the institution filter through URL state, query keys and backend validation. AI added three targeted tests; all nine tests pass. Topic filtering and author/country search are not implemented. The developer requested a pause after connecting institutions to reassess the time spent.
+
+At my request, AI replaced the native institution select with a single-select combobox based on the Base UI primitives used by shadcn/ui, with project-specific styling instead of installing the full shadcn theme. AI checked local option search and institution selection updating the URL in the browser. Type checking, all nine tests and the frontend build passed.

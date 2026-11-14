@@ -1,3 +1,4 @@
+import { InstitutionCombobox } from "./InstitutionCombobox";
 import { useState } from "react";
 import { useInstitutions } from "../hooks/useInstitutions";
 
@@ -73,42 +74,22 @@ export function PublicationSearchControls({
               htmlFor="institution-filter"
             >
               Institution
-              <select
-                disabled={isPending || (isError && !institutions)}
+              <InstitutionCombobox
+                institutions={institutions?.results ?? []}
                 value={institution}
-                onChange={(event) => onInstitutionChange(event.target.value)}
-                id="institution-filter"
-                aria-describedby="institution-help"
-                className="w-full rounded-sm border border-[#b5cccf] bg-white px-3 py-2 text-base font-normal sm:max-w-96"
-              >
-                <option value="">
-                  {isPending
+                onChange={onInstitutionChange}
+                disabled={isPending || (isError && !institutions)}
+                placeholder={
+                  isPending
                     ? "Loading institutions…"
                     : isError
                       ? "Institutions unavailable"
-                      : "All institutions"}
-                </option>
-
-                {institution &&
-                  !institutions?.results.some((item) =>
-                    item.id.endsWith(`/${institution}`),
-                  ) && (
-                    <option value={institution}>
-                      Selected institution ({institution})
-                    </option>
-                  )}
-                {institutions?.results.map((institution) => (
-                  <option
-                    key={institution.id}
-                    value={institution.id.split("/").pop()}
-                  >
-                    {institution.name} ({institution.count})
-                  </option>
-                ))}
-              </select>
+                      : "All institutions"
+                }
+              />
             </label>
             <p id="institution-help" className="text-sm">
-              Top 100 institutions in matching publications.
+              Search within the top 100 institutions in matching publications.
             </p>
             {isError && (
               <button
