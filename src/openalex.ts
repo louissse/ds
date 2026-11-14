@@ -1,13 +1,11 @@
-import type {
-  OpenAlexWork,
-  OpenAlexWorksResponse,
-} from "./shared/openalex-types";
+import type { OpenAlexWorksResponse } from "./shared/openalex-types";
 import { setTimeout as sleep } from "node:timers/promises";
 
 export async function fetchPublicationsPage(
   page: number,
   pageSize: number,
-): Promise<OpenAlexWork[]> {
+  workId?: string,
+): Promise<OpenAlexWorksResponse> {
   const url = new URL("https://api.openalex.org/works");
 
   url.searchParams.set("search", "climate change");
@@ -15,6 +13,11 @@ export async function fetchPublicationsPage(
     "filter",
     "institutions.country_code:DK,from_publication_date:2025-01-01,to_publication_date:2025-12-31",
   );
+  if (workId) {
+    const scopeFilter = url.searchParams.get("filter");
+
+    url.searchParams.set("filter", `${scopeFilter},openalex:${workId}`);
+  }
   url.searchParams.set("page", String(page));
   url.searchParams.set("per_page", String(pageSize));
 
@@ -33,7 +36,7 @@ export async function fetchPublicationsPage(
 
     if (response.ok) {
       const data = (await response.json()) as OpenAlexWorksResponse;
-      return data.results;
+      return data;
     }
 
     const canRetry = response.status === 429 || response.status >= 500;

@@ -21,5 +21,8 @@ export type OpenAlexWork = {
 };
 
 export type OpenAlexWorksResponse = {
+  meta: {
+    count: number;
+  };
   results: OpenAlexWork[];
 };

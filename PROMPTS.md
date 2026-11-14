@@ -62,3 +62,9 @@ I explicitly requested the grill-with-docs skill to establish a shared understan
 ## First automated test
 
 AI installed Vitest and wrote one focused test of abstract reconstruction through the shared publication mapper, using fictional input with out-of-order and repeated words. AI ran `npm test` and `npm run typecheck`; both passed. This verifies only that behaviour, not the full mapping or HTTP flow.
+
+## First vertical slice completed
+
+The developer wrote most of the Hono, React, Vite, Tailwind and TanStack Query setup with incremental AI guidance. At explicit requests, AI corrected type connections, implemented the publication list item and pagination controls, and limited the display to the first three authors and their institutions. The developer questioned the need for React Router and requested an explanation of fetch cancellation and timeouts before implementing a 30-second timeout.
+
+The developer manually checked pagination, skeletons, error handling, empty results, narrow layout, keyboard operation and boundary controls. AI verified that the temporary empty response was removed and reran type checking and the existing abstract test successfully. Search, filters and details remain outside this completed slice.

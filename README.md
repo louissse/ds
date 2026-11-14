@@ -4,7 +4,7 @@ A full-stack coding exercise exploring climate-related publications from Danish 
 
 ## Scope and status
 
-The import script has successfully stored 1,000 publications in SQLite. A Hono backend and React frontend are planned but have not been implemented yet.
+The import script has successfully stored 1,000 publications in SQLite. The first Hono/React vertical slice is complete: a paginated publication list with loading skeletons, empty and error states, and manual retry. Search, filters and details remain to be implemented.
 
 Search will use the OpenAlex API directly within the exercise's fixed scope. SQLite separately demonstrates data extraction and storage. Additional analysis and public deployment are currently out of scope.
 
@@ -25,6 +25,15 @@ Development uses Node.js 22.14.0 and npm.
 3. Run `npm run import`.
 
 The script creates `publications.sqlite` in the current working directory, so run it from the project root. The environment file and database are excluded from Git. Run `npm run format` to format the code.
+
+## Running the web application
+
+After installing dependencies and creating `.env` as above, run these commands in separate terminals:
+
+- `npm run dev:server` starts Hono on port 3000.
+- `npm run dev:client` starts Vite; open the URL printed in its terminal.
+
+Vite proxies `/api` requests to Hono. The list shows 10 records per page and stores the page in the URL. TanStack Query caches each page in memory; a full reload clears that cache. Browser requests time out after 30 seconds.
 
 ## Data and technical decisions
 
@@ -95,7 +104,7 @@ HTTP 429 and server errors (5xx) trigger up to three retries, normally after 2, 
 
 A publication was fetched, transformed and inspected in SQLite Viewer. Upsert was tested by importing the title as `TEST`, then importing the original title again. There was still only one row with that ID. The import was expanded incrementally, first to multiple publications, then two pages, and finally 10 pages. The completed import was verified to contain 1,000 rows in SQLite.
 
-Run `npm test` for the first Vitest test: it verifies abstract reconstruction with out-of-order and repeated words through the shared publication mapping. Run `npm run typecheck` for static type checking. Both checks pass. Retry branches have not been explicitly tested. The initial Hono endpoints are working locally; the frontend is not implemented yet.
+Run `npm test` for the first Vitest test: it verifies abstract reconstruction with out-of-order and repeated words through the shared publication mapping. Run `npm run typecheck` for static type checking. Both checks pass. Retry branches have not been explicitly tested. The list frontend and Hono endpoints work locally. See the first story for the manual verification record and remaining limitations.
 
 ## UX and visual direction
 

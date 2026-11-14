@@ -58,7 +58,8 @@ async function main() {
   let savedCount = 0;
 
   for (let page = 1; page <= maxPages; page++) {
-    const works = await fetchPublicationsPage(page, pageSize);
+    const data = await fetchPublicationsPage(page, pageSize);
+    const works = data.results;
 
     if (works.length === 0) {
       break;
