@@ -1,159 +1,131 @@
 # OpenAlex publications
 
-A full-stack coding exercise exploring climate-related publications from Danish institutions, published in 2025.
+A research explorer for climate-related publications associated with Danish institutions and published in 2025. Built with React, Hono and the OpenAlex API.
 
-This repository covers two distinct but connected parts of the exercise:
+The repository contains two parts:
 
-1. **Data extraction and storage:** A TypeScript script retrieves 1,000 publications from OpenAlex and stores selected metadata in SQLite. It preserves author affiliations and updates existing publications when the import is rerun.
-2. **Research explorer:** A small Hono and React application lets users browse publications, search by title, filter by institution and open publication details. It queries OpenAlex directly, so results are not limited to the 1,000 imported records.
+- A TypeScript import script that stores 1,000 publications in SQLite and updates existing records on subsequent imports.
+- A web application with title search, a searchable institution filter, pagination and publication details. It queries OpenAlex directly, so users can explore more than the imported records.
 
-Both parts focus on climate-related publications associated with Danish institutions and published in 2025. They share the same publication model and mapping, while the SQLite import and live search have separate responsibilities.
+![Title search, institution selection and a matching publication in the React application](docs/images/publication-search.png)
 
-### Explore publications
+The detail page shows the abstract, citation count, access status, publication links and author affiliations. Long author and institution lists expand on demand.
 
-The application combines title search, a searchable institution selector and pagination. Active search criteria are stored in the URL, so a search can be shared or restored when returning from a publication.
+![Publication details with metadata and abstract](docs/images/publication-details.png)
 
-![The React application showing title search, institution selection and a matching publication](docs/images/publication-search.png)
+I developed the application in vertical slices and chose tools I could work with and explain. AI helped with implementation and review in small steps. [PROMPTS.md](PROMPTS.md) records the prompts, division of work and verification.
 
-### Inspect a publication
+## Scope
 
-The detail page brings together the abstract, citation count, access status and publication links. Author affiliations and a deduplicated institution list can be expanded when needed, keeping large collaborations manageable to read.
+The import, publication list, details, title search and single-institution filter work locally. List and detail requests have loading skeletons, error messages and manual retry. Empty results have a separate message.
 
-![Publication details showing the title, publication metadata and abstract](docs/images/publication-details.png)
+Author and country search, the topic filter, extra analysis and public deployment are not implemented. The search-type selector and topic filter remain disabled in the UI. Only one of the exercise's two required filters is complete.
 
-### A few decisions behind the solution
+## Run locally
 
-- **A working flow before more features:** Development followed vertical slices, starting with a real publication list from React through Hono to OpenAlex, then adding details, search and institution filtering.
-- **A deliberate data model:** The import stores fields needed by the interface rather than the entire API response. Authors retain their order and their individual institutional affiliations.
-- **AI-assisted, with developer review:** I worked through the implementation in small steps, questioned suggestions and checked the results. [PROMPTS.md](PROMPTS.md) records the division of work and verification.
+### Prerequisites and configuration
 
-## Scope and status
+Development used Node.js 22.14.0 and npm. Run all commands from the repository root.
 
-The import script has stored 1,000 publications in SQLite. The web application supports a paginated publication list, title search, a searchable single-institution filter and publication details. List and detail loading use skeletons; failures offer manual retry.
+Install dependencies:
 
-The solution is intentionally partial. Author/country search and the topic filter are visible but disabled. Only one of the exercise's two required filters is implemented. Additional analysis and public deployment have not been completed.
-
-## Architecture
-
-React, TypeScript, Vite and Tailwind form the frontend, with React Router for navigation and URL state, TanStack Query for server state, and Base UI for the institution combobox. Hono runs on Node.js and calls OpenAlex with the API key kept server-side.
-
-The web application reads from OpenAlex, not SQLite. The database independently demonstrates data extraction and storage. Import and backend share the publication mapping and types. See [application architecture](docs/architecture.md) for the original decisions.
-
-Implementation records: [publication list](docs/stories/01-publication-list.md) and [publication details](docs/stories/02-publication-details.md). These distinguish completed checks from remaining manual verification.
-
-## Running the import
-
-Development uses Node.js 22.14.0 and npm.
-
-1. Run `npm ci`.
-2. Create `.env` in the project root containing `OPENALEX_API_KEY=your_key`.
-3. Run `npm run import`.
-
-The script creates `publications.sqlite` in the current working directory, so run it from the project root. The environment file and database are excluded from Git. Run `npm run format` to format the code.
-
-## Running the web application
-
-After installing dependencies and creating `.env` as above, run these commands in separate terminals:
-
-- `npm run dev:server` starts Hono on port 3000.
-- `npm run dev:client` starts Vite; open the URL printed in its terminal.
-
-Vite proxies `/api` requests to Hono. The list shows 10 records per page and stores the page in the URL. TanStack Query caches each page in memory; a full reload clears that cache. Frontend timeouts are 10 seconds for lists, 30 seconds for details and 15 seconds for institution options. Queries are considered fresh for five minutes; automatic frontend retries are disabled.
-
-## Data and technical decisions
-
-- TypeScript is used for the import script and SQLite for local storage. SQLite was chosen because I have some familiarity with it and it requires minimal setup.
-- We store fields relevant to the results list and detail view rather than the entire API response: title, date, links, citation count, abstract, open access information, author affiliations and topics.
-- Simple values are stored in columns. Author affiliations and topics are stored as JSON text to preserve their nested structure without introducing many tables. Separate tables would make extensive SQL analysis of these relationships easier.
-- The OpenAlex ID is the primary key. The import inserts new publications and updates existing ones, preventing duplicates when rerun.
-- Author order and `author_position` are preserved. Institutions and their countries are nested under each author. The UI's combined institution list is derived from these affiliations and deduplicated by institution ID.
-- Abstracts are reconstructed from OpenAlex's word positions. Missing abstracts are stored as `null`.
-
-## Publication model
-
-Each row in `publications` represents one OpenAlex publication. The import maps the API response to a smaller application object, then stores it as follows:
-
-| Application field         | SQLite column      | Content                                          |
-| ------------------------- | ------------------ | ------------------------------------------------ |
-| `id`                      | `id`               | OpenAlex ID; primary key used for upsert         |
-| `title`                   | `title`            | Publication title                                |
-| `publicationDate`         | `publication_date` | Date as `YYYY-MM-DD` text                        |
-| `citationCount`           | `citation_count`   | Integer citation count                           |
-| `doi`                     | `doi`              | DOI URL, or `null`                               |
-| `landingPageUrl`          | `landing_page_url` | Publication page URL, or `null`                  |
-| `abstract`                | `abstract`         | Reconstructed abstract text, or `null`           |
-| `openAccess.isOpenAccess` | `is_open_access`   | Boolean stored as integer `0` or `1`             |
-| `openAccess.status`       | `oa_status`        | OpenAlex open access status                      |
-| `openAccess.url`          | `oa_url`           | Open access URL, or `null`                       |
-| `authorships`             | `authorships_json` | Ordered author affiliations, stored as JSON text |
-| `topics`                  | `topics_json`      | Topic IDs and names, stored as JSON text         |
-
-The nested fields have this shape (illustrative values):
-
-```json
-{
-  "authorships": [
-    {
-      "authorId": "https://openalex.org/A123",
-      "authorName": "Example Author",
-      "authorPosition": "first",
-      "institutions": [
-        {
-          "id": "https://openalex.org/I123",
-          "name": "Example University",
-          "countryCode": "DK"
-        }
-      ]
-    }
-  ],
-  "topics": [
-    {
-      "id": "https://openalex.org/T123",
-      "name": "Example topic"
-    }
-  ]
-}
+```bash
+npm ci
 ```
 
-An author ID or institution country code may be `null`, and the lists may be empty. Each author can have multiple institutions. Countries describe institutional affiliations, not author nationality. `authorPosition` is `first`, `middle` or `last`; the array order is also preserved because multiple authors can be `middle`.
+Create a `.env` file in the repository root containing your OpenAlex API key:
 
-The results list can use title, date, authors, institutions and topics. The detail view additionally uses the abstract, full author affiliations, citation count, links and open access information. A combined institution list is derived from the authorships and deduplicated by institution ID, rather than stored a second time.
+```dotenv
+OPENALEX_API_KEY=your_key
+```
 
-## Import behaviour
+The server and import script load this file. It is excluded from Git, along with the local database and dependencies. The browser never receives the API key.
 
-The import requests 10 pages of 100 publications sequentially, saving each page before requesting the next. It waits one second between pages and stops early if a page is empty. API requests are kept in `src/openalex.ts`; pagination, mapping and storage are handled by `src/import-publications.ts`.
+### Start the application
 
-HTTP 429 and server errors (5xx) trigger up to three retries, normally after 2, 4 and 8 seconds. For 429 responses, `Retry-After` is honoured when valid. Network failures without an HTTP response are not retried. Previously saved rows remain available if a later request fails; rerunning the script starts from page 1 and updates existing records.
+Start Hono in one terminal:
 
-## Manual verification so far
+```bash
+npm run dev:server
+```
 
-A publication was fetched, transformed and inspected in SQLite Viewer. Upsert was tested by importing the title as `TEST`, then importing the original title again. There was still only one row with that ID. The import was expanded incrementally, first to multiple publications, then two pages, and finally 10 pages. The completed import was verified to contain 1,000 rows in SQLite.
+Start Vite in another:
 
-Run `npm test` for nine Vitest tests covering abstract reconstruction, detail success/400/404/502 and subsequent recovery, institution validation, and scope-preserving query construction. Upstream responses are simulated; tests do not use a live API key. Run `npm run typecheck` for static type checking. Both checks were rerun successfully on 15 November 2026. The frontend build also passed during implementation.
+```bash
+npm run dev:client
+```
 
-Browser checks during development covered list navigation, loading/error/empty states, list keyboard/narrow-screen behaviour, direct detail loading, author expansion, out-of-scope details and combobox search/selection updating the URL. These are manual checks, not an automated browser suite. Remaining detail-specific checks are recorded in the detail story. OpenAlex retry branches have not been explicitly tested.
+Hono listens on port 3000. Open the frontend URL printed by Vite, usually `http://localhost:5173`. Vite forwards `/api` requests to Hono.
 
-## UX and visual direction
+The web application does not require the SQLite database or an import run.
 
-See [the visual handoff](docs/design/README.md) for screenshots and a self-contained interactive prototype.
+### Import publications
 
-The interface was explored with a separate interactive prototype using fictional publications before implementing the web application.
+```bash
+npm run import
+```
 
-- Visual inspiration: [Research Portal Denmark](https://local.forskningsportal.dk/search/78730) and [Statistics Denmark](https://www.dst.dk/da/Statistik/emner/borgere/navne/hvor-mange-hedder). Use readable dark text, blue links and actions, and sans-serif typography. Prefer DIN Next when available, with Helvetica/Arial fallbacks.
-- The introduction uses background `#F4F7FC` and a `4px solid #0074c6` left border. The top rule uses the same blue.
-- Keep results compact, with three visually separated groups: date/open access/title; authors/institutions; topics. Use commas rather than dot separators. Topics appear as plain text rather than badges.
-- Title search is active. The search-type selector and topic filter remain disabled. The climate, Danish-affiliation and 2025 scope remains fixed.
-- A small **Clear filters** action appears when the institution filter is active. It removes that filter while preserving the search text.
-- Selecting a title opens publication details. The combined institution list is deduplicated by institution ID.
+The script creates `publications.sqlite` in the working directory. It requests ten pages of 100 publications, waits one second between pages and stops early if a page is empty. Each page is saved before the next request. Rerunning starts at page 1 and uses the OpenAlex ID to insert or update each record without duplicates. Saved records remain if a later request fails.
 
-### Implemented UI states
+## Architecture and data
 
-- **Loading:** list and detail skeletons with screen-reader loading text and reduced-motion support.
-- **Request failure:** a clear error message and **Try again**, repeating the request while preserving search and filters.
-- **No matches:** a separate no-publications message, distinct from a request failure.
-- Details initially show eight author names, with all available authors and affiliations accessible through an expansion button. The deduplicated institution/country paragraph independently expands beyond eight institutions.
+| Component                | Responsibility                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| React, Vite and Tailwind | Pages, layout and styling                                                        |
+| React Router             | List/detail navigation and search criteria in the URL                            |
+| TanStack Query           | API request state and in-memory caching                                          |
+| Base UI                  | Searchable institution combobox with local Tailwind styling                      |
+| Hono on Node.js          | Validate parameters, enforce the collection scope and call OpenAlex              |
+| SQLite import script     | Retrieve and store the separate 1,000-record dataset                             |
+| Shared types and mapping | Convert OpenAlex responses into the publication model used by import and backend |
 
-The prototype is an earlier design reference; the React implementation has since added loading/error states and a searchable institution combobox.
+The browser calls Hono, which queries OpenAlex and returns mapped publication data. SQLite is used by the import script only. I chose the API search approach because I have no Elasticsearch experience, and SQLite because I have some familiarity with it and it needs little setup.
+
+### Publication model
+
+We retain the fields needed by the list and details: ID, title, date, citation count, abstract, DOI, external links, open access information, topics and author affiliations.
+
+Each author keeps their position in the list, their `first`/`middle`/`last` value and their own institutions with country codes. This preserves multiple affiliations and allows the UI to derive a combined institution list without duplicates. Countries describe affiliations, not nationality. Missing optional metadata is expected; the UI uses fallback text.
+
+SQLite stores simple values in columns and authorships/topics as JSON text. This keeps the nested relationships without many tables. Separate tables would make extensive SQL analysis easier. The import reconstructs readable abstracts from OpenAlex's word positions and stores missing abstracts as `null`.
+
+See the [field-by-field publication model](docs/publication-model.md) for column names and an example object.
+
+### Search, filters and caching
+
+The URL stores the committed title query, institution ID and page. Text being typed stays in local React state until submit. A new search or institution selection resets the page to 1. Clear filters removes the institution while preserving the title query.
+
+The institution endpoint groups the matching publications and returns the 100 institutions with the most matches, sorted alphabetically. Options follow the title query, independently of the selected institution and page. They include international collaborators. Typing in the combobox searches only these downloaded options.
+
+TanStack Query caches results by search criteria and page, considers them fresh for five minutes and disables automatic frontend retries. A full reload clears the cache. Details can reuse list data with its original update time; direct links fetch through the backend when needed.
+
+## Verification
+
+```bash
+npm test
+npm run typecheck
+```
+
+Nine Vitest tests cover abstract reconstruction, detail responses, invalid IDs, safe upstream errors and subsequent recovery, institution validation and preservation of the fixed scope in API queries. They simulate OpenAlex responses and need no live API key. Tests and type checking passed on 15 November 2026. A frontend production build also passed during development.
+
+Manual checks covered the 1,000-row database, upsert, pagination and URL navigation, loading/error/empty states, list keyboard and narrow-screen behaviour, direct detail loading, author expansion and combobox search/selection. Upsert was checked by importing a test title and then restoring the real title without adding a duplicate row.
+
+There is no automated frontend interaction suite. OpenAlex retry branches have not been explicitly tested. The [list story](docs/stories/01-publication-list.md) and [detail story](docs/stories/02-publication-details.md) record checks and outstanding manual verification. Use `npm run format` to format the project.
+
+## Assumptions and limitations
+
+- Scope means matching OpenAlex's `climate change` search, at least one Danish institutional affiliation and a publication date in 2025. We do not manually assess climate relevance.
+- The app depends on OpenAlex availability, API budget and metadata quality. TypeScript describes the expected responses but does not validate them at runtime.
+- Institution options are limited to the top 100. Basic pagination exposes at most the first 10,000 matching publications.
+- Result cards show three authors and derive the institution summary from those authors. An institution associated with a later author may explain a search match but be absent from that summary. Details use all returned authorships.
+- Browser timeouts are 10 seconds for lists, 30 for details and 15 for institution options. Backend publication requests retry HTTP 429 and server errors up to three times, normally after 2, 4 and 8 seconds, respecting a valid `Retry-After` for 429. They have no explicit upstream timeout and do not retry network failures. Institution requests have a ten-second timeout without automatic retries. Browser cancellation does not stop backend work.
+- Import upserts update matching rows even when their stored values are unchanged. JSON storage preserves the author list order; `author_position` alone cannot order multiple middle authors.
+
+## Possible next steps
+
+Complete the second filter and author/country search. Make institution summaries explain search matches independently of truncated author names. Add frontend interaction tests for filter changes, pagination reset and navigation back to the same search.
+
+Further work could consolidate HTTP handling, validate external responses, skip unchanged database writes and organise the client by feature as it grows.
 
 ## Deployment
 
@@ -167,14 +139,10 @@ Local execution is supported as described above. Public deployment has not been 
 
 The SQLite file is not needed by the deployed web app. Do not deploy `.env` or expose the API key to the frontend.
 
-## AI usage
+## Further documentation
 
-See [PROMPTS.md](PROMPTS.md) for selected prompts, division of work and verification of AI suggestions.
+- [AI usage and selected prompts](PROMPTS.md)
+- [Architecture decisions](docs/architecture.md)
+- [Design exploration and prototype](docs/design/README.md), an earlier reference rather than the current UI
 
-## Search and institution filtering status
-
-Title search and institution filtering are connected from React through Hono to OpenAlex. Committed search text and institution ID are stored in URL parameters and query keys. Changing the institution resets pagination to page 1; Clear filters removes the institution while preserving the search. Institution options follow title search, not the selected institution or publication page. They contain at most the top 100 matching institutions by publication count, displayed alphabetically, including international collaborators. Topic filtering and author/country search remain unimplemented.
-
-Institution options and selection were checked in the browser, including local combobox search and the selected ID appearing in the URL.
-
-The institution selector is a single-select searchable combobox using Base UI, the primitive behind shadcn/ui's Base combobox, with local Tailwind styling. Typing filters only the downloaded top 100 options; it does not query all OpenAlex institutions. The rest of the UI remains unchanged.
+The UI takes visual cues from [Research Portal Denmark](https://local.forskningsportal.dk/search/78730) and [Statistics Denmark](https://www.dst.dk/da/Statistik/emner/borgere/navne/hvor-mange-hedder). The current implementation uses dark text, blue actions and an introduction with background `#F4F7FC` and a `4px` blue border in `#0074c6`.
