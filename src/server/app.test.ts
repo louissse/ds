@@ -40,7 +40,7 @@ test("invalid IDs are rejected without contacting OpenAlex", async () => {
 
 test("missing or out-of-scope publications return 404", async () => {
   fetchPage.mockResolvedValue({ meta: { count: 0 }, results: [] });
-  const response = await app.request("/api/publications/W123");
+  const response = await app.request("/api/publications/W2036435789");
   expect(response.status).toBe(404);
   expect(await response.json()).toEqual({
     error: "Publication not found within this collection.",

@@ -44,7 +44,7 @@ AI consulted the OpenAlex documentation and proposed sequential requests with 10
 
 > I would like to take a short break from code and decide on UX and UI with a quick browser prototype using no real data.
 
-AI built a separate interactive prototype with fictional publications. I directed revisions to contrast, typography and colours using Research Portal Denmark and Statistics Denmark as references. I specified the introduction background and blue border, refined result spacing into three groups, chose plain comma-separated topics instead of badges, and requested a search-type dropdown and a discreet clear-filters action. We also agreed on skeleton loading, retryable request errors and a separate empty-results state for the implementation. These are design decisions; they do not mean the actual frontend has been implemented.
+AI built a separate interactive prototype with fictional publications. I directed revisions to contrast, typography and colours using Research Portal Denmark and Statistics Denmark as references. I specified the introduction background and blue border, refined result spacing into three groups, chose plain comma-separated topics instead of badges, and requested a search-type dropdown and a discreet clear-filters action. We also agreed on skeleton loading, retryable request errors and a separate empty-results state for the implementation. This stage established the design before the frontend implementation described below.
 
 ## Verification
 
@@ -53,7 +53,7 @@ AI built a separate interactive prototype with fictional publications. I directe
 - I tested upsert by saving a test title and then reimporting the correct title. The publication was updated without adding another row.
 - The import was extended to multiple publications, then two pages and finally 10 pages. I confirmed that 1,000 publications were stored and that I understood the flow. AI subsequently verified the row count directly in SQLite.
 
-There are no automated tests yet, and the retry branches have not been explicitly tested. The import of 1,000 publications is complete; the backend and frontend are not implemented yet.
+At this stage, the import was complete; automated tests and the web application were added in the later stages below.
 
 ## Architecture clarification before the first slice
 
@@ -71,10 +71,16 @@ The developer manually checked pagination, skeletons, error handling, empty resu
 
 ## Detail presentation and verification
 
-At my request, AI implemented the detail layout following the agreed design, then revised author and institution sections into compact, expandable paragraphs based on my feedback. I asked AI to add a detail skeleton and test the flow. AI separated the Hono app from server startup for testing and added simulated-response tests for detail success, invalid IDs, 404, upstream failure/recovery and fixed-scope query construction. All six tests, type checking and frontend build pass. Browser rendering and expansion behaviour still need final manual verification; backend tests do not claim to cover those interactions.
+At my request, AI implemented the detail layout following the agreed design, then revised author and institution sections into compact, expandable paragraphs based on my feedback. I asked AI to add a detail skeleton and test the flow. AI separated the Hono app from server startup for testing and added simulated-response tests for detail success, invalid IDs, 404, upstream failure/recovery and fixed-scope query construction. At this stage, all six tests, type checking and frontend build passed. AI later checked direct detail loading, author expansion, the not-found message and generic error display in the browser. Remaining manual checks are recorded in the detail story; backend tests do not cover rendering.
 
 ## Search and institution filter
 
 The developer implemented title search and institution-group endpoints with AI guidance and proposed obtaining institution choices from the current search rather than a hard-coded list. We limited options to the top 100 groups. At the developer's request, AI connected a controlled search input and later the institution filter through URL state, query keys and backend validation. AI added three targeted tests; all nine tests pass. Topic filtering and author/country search are not implemented. The developer requested a pause after connecting institutions to reassess the time spent.
 
 At my request, AI replaced the native institution select with a single-select combobox based on the Base UI primitives used by shadcn/ui, with project-specific styling instead of installing the full shadcn theme. AI checked local option search and institution selection updating the URL in the browser. Type checking, all nine tests and the frontend build passed.
+
+## Current development handoff
+
+As of 15 November 2026, implemented features are the 1,000-record SQLite import, paginated list, details with cache reuse and direct lookup, skeleton/error/empty states, title search and a single institution filter. AI also adjusted combobox popup anchoring to match the input width and pointer styling on options after my feedback. Author/country search, topic filtering, public deployment and extra analysis are not implemented.
+
+The developer wrote much of the setup and request/state wiring with incremental guidance. AI directly implemented or corrected selected components, types, integration, tests and documentation when requested. The latest verification reran all nine tests and type checking successfully. No automated browser suite exists. Development review ideas are kept separately from this development log.
