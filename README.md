@@ -93,7 +93,7 @@ See the [field-by-field publication model](docs/publication-model.md) for column
 
 ### Search, filters and caching
 
-The URL stores the committed title query, institution ID and page. Text being typed stays in local React state until submit. A new search or institution selection resets the page to 1. Clear filters removes the institution while preserving the title query.
+The URL stores the committed title query, institution ID and page. Text being typed stays in local React state until submit. Changing the title query clears the institution filter. A search or institution selection resets the page to 1. Clear filters removes the institution while preserving the title query.
 
 The institution endpoint groups the matching publications and returns the 100 institutions with the most matches, sorted alphabetically. Options follow the title query, independently of the selected institution and page. They include international collaborators. Typing in the combobox searches only these downloaded options.
 

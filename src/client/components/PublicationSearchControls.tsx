@@ -30,7 +30,7 @@ export function PublicationSearchControls({
         yet.
       </p>
       <form
-        aria-describedby="search-preview-note"
+        aria-describedby="search-preview-note search-filter-note"
         onSubmit={(event) => {
           event.preventDefault();
           onSearch(searchText.trim());
@@ -67,6 +67,9 @@ export function PublicationSearchControls({
             Search
           </button>
         </div>
+        <p id="search-filter-note" className="mt-2 text-sm">
+          Changing your title search clears the institution filter.
+        </p>
         <div className="mt-4 flex flex-wrap items-start gap-4">
           <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:max-w-96">
             <label

@@ -31,13 +31,16 @@ export default function PublicationsListPage() {
     });
   }
 
-  function searchPublications(query: string) {
+  function searchPublications(nextQuery: string) {
     setSearchParams((current) => {
       const updated = new URLSearchParams(current);
-      if (query) {
-        updated.set("q", query);
+      if (nextQuery) {
+        updated.set("q", nextQuery);
       } else {
         updated.delete("q");
+      }
+      if (nextQuery !== query) {
+        updated.delete("institution");
       }
       updated.set("page", "1");
       return updated;
